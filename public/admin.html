@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="header">
+        <h1>Panel de Administración</h1>
+        <div>
+            <a href="index.html" class="btn-secondary" target="_blank">Ver tienda</a>
+            <button id="btn-logout" class="btn-danger">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- Formulario para Agregar o Editar Producto -->
+        <section class="admin-section">
+            <h2 id="form-titulo">Agregar Nuevo Producto</h2>
+            <form id="form-producto" enctype="multipart/form-data">
+                <input type="hidden" id="producto-id"> <!-- Campo oculto para edición -->
+
+                <div class="form-group">
+                    <label for="nombre">Nombre del producto:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="precio">Precio ($):</label>
+                    <input type="number" step="0.01" id="precio" name="precio" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="imagen">Imagen:</label>
+                    <input type="file" id="imagen" name="imagen" accept="image/*">
+                    <small id="imagen-ayuda">Obligatorio al crear. Dejar vacío al editar si no deseas cambiarla.</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" id="btn-guardar">Guardar Producto</button>
+                    <button type="button" class="btn-secondary" id="btn-cancelar" style="display: none;">Cancelar Edición</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Tabla de Productos Existentes -->
+        <section class="admin-section">
+            <h2>Productos Actuales</h2>
+            <table class="tabla-productos">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-body">
+                    <!-- Productos cargados por JS -->
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

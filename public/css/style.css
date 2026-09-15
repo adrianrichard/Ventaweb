@@ -1,0 +1,60 @@
+/* Formularios y Login */
+.auth-container {
+    max-width: 400px;
+    margin: 4rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+}
+
+.form-group input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.error-msg {
+    color: red;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Botones */
+.btn-primary { background: #3498db; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; }
+.btn-secondary { background: #7f8c8d; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; text-decoration: none; cursor: pointer; }
+.btn-danger { background: #e74c3c; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; }
+.btn-edit { background: #f39c12; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
+.btn-delete { background: #e74c3c; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
+
+/* Panel Admin */
+.admin-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.tabla-productos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.tabla-productos th, .tabla-productos td {
+    padding: 0.8rem;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
