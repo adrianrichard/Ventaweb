@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Admin - Mi Tienda</title>
+    <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+
+    <div class="auth-container">
+        <h2>Iniciar Sesión (Admin)</h2>
+        <form id="form-login">
+            <div class="form-group">
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn-primary">Ingresar</button>
+            <p id="error-msg" class="error-msg"></p>
+        </form>
+        <a href="index.html" class="link-volver">← Volver al catálogo</a>
+    </div>
+
+    <script src="/public/js/login.js"></script>
+</body>
+</html>

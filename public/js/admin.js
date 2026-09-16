@@ -26,7 +26,7 @@ async function cargarProductosAdmin() {
             tr.innerHTML = `
                 <td><img src="/uploads/${p.imagen}" width="60" height="60" style="object-fit:cover;"></td>
                 <td>${p.nombre}</td>
-                <td>$${p.precio.toFixed(2)}</td>
+                <td>$${parseFloat(p.precio).toFixed(2)}</td>
                 <td>
                     <button onclick="prepararEdicion(${p.id}, '${p.nombre}', ${p.precio})" class="btn-edit">Editar</button>
                     <button onclick="eliminarProducto(${p.id})" class="btn-delete">Eliminar</button>

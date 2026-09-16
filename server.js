@@ -5,22 +5,24 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const db = require('./db');
+const sharp = require('sharp');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. Middlewares de análisis de cuerpo y sesión
+// 1. Middlewares para parsear el cuerpo de las peticiones
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 2. Configuración de sesiones
 app.use(session({
-    secret: 'clave_secreta_mi_tienda_123', // Cambia esto por una frase segura
+    secret: 'clave_secreta_mi_tienda_123', // Cambia esta frase por una más segura
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 2 } // La sesión expira en 2 horas
+    cookie: { maxAge: 1000 * 60 * 60 * 2 } // Expira en 2 horas
 }));
 
-// 2. Configurar la subida de imágenes con Multer
+// 3. Configurar la subida de imágenes con Multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = path.join(__dirname, 'public/uploads');
@@ -30,7 +32,7 @@ const storage = multer.diskStorage({
         cb(null, dir);
     },
     filename: (req, file, cb) => {
-        // Renombrar imagen para evitar duplicados usando timestamp
+        // Genera un nombre único usando timestamp para evitar sobreescritura
         const ext = path.extname(file.originalname);
         const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
         cb(null, filename);
@@ -38,10 +40,13 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 3. Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, 'public')));
+// 4. Archivos estáticos
+// Permite acceder a los archivos estáticos de la carpeta raíz (HTML) y de public (CSS, JS, imágenes)
+app.use(express.static(__dirname));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// Middleware para proteger rutas de administración
+// Middleware para proteger rutas que requieren permisos de Administrador
 function verificarAdmin(req, res, next) {
     if (req.session && req.session.esAdmin) {
         return next();
@@ -50,10 +55,30 @@ function verificarAdmin(req, res, next) {
 }
 
 // ==========================================
+// RUTAS PARA SERVIR PÁGINAS HTML (DESDE LA RAÍZ)
+// ==========================================
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+app.get('/admin', (req, res) => {
+    if (req.session && req.session.esAdmin) {
+        res.sendFile(path.join(__dirname, 'admin.html'));
+    } else {
+        res.redirect('/login');
+    }
+});
+
+// ==========================================
 // RUTAS DE AUTENTICACIÓN
 // ==========================================
 
-// Login de Administrador
+// Iniciar sesión
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -75,7 +100,7 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ mensaje: 'Usuario o contraseña incorrectos.' });
         }
     } catch (error) {
-        console.error(error);
+        console.error('Error en login:', error);
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 });
@@ -90,21 +115,21 @@ app.post('/api/logout', (req, res) => {
 });
 
 // ==========================================
-// RUTAS DE PRODUCTOS (CRUD)
+// RUTAS DE PRODUCTOS (API CRUD)
 // ==========================================
 
-// Obtener todos los productos (Público)
+// Obtener todos los productos (Acceso Público)
 app.get('/api/productos', async (req, res) => {
     try {
         const [productos] = await db.query('SELECT * FROM productos ORDER BY id DESC');
         res.json(productos);
     } catch (error) {
-        console.error(error);
+        console.error('Error al obtener productos:', error);
         res.status(500).json({ mensaje: 'Error al obtener los productos.' });
     }
 });
 
-// Agregar un producto (Protegido por Admin)
+// Agregar un nuevo producto (Protegido por Admin)
 app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, res) => {
     const { nombre, precio } = req.body;
     
@@ -121,12 +146,12 @@ app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, 
         );
         res.status(201).json({ mensaje: 'Producto creado exitosamente.' });
     } catch (error) {
-        console.error(error);
+        console.error('Error al crear producto:', error);
         res.status(500).json({ mensaje: 'Error al guardar el producto.' });
     }
 });
 
-// Editar un producto (Protegido por Admin)
+// Editar un producto existente (Protegido por Admin)
 app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (req, res) => {
     const { id } = req.params;
     const { nombre, precio } = req.body;
@@ -139,7 +164,7 @@ app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (re
 
         let nuevaImagen = productoExistente[0].imagen;
 
-        // Si se sube una nueva imagen, se borra la anterior del disco
+        // Si el admin sube una nueva imagen, reemplaza la anterior y borra la vieja del disco
         if (req.file) {
             nuevaImagen = req.file.filename;
             const rutaAntigua = path.join(__dirname, 'public/uploads', productoExistente[0].imagen);
@@ -155,7 +180,7 @@ app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (re
 
         res.json({ mensaje: 'Producto actualizado exitosamente.' });
     } catch (error) {
-        console.error(error);
+        console.error('Error al actualizar producto:', error);
         res.status(500).json({ mensaje: 'Error al actualizar el producto.' });
     }
 });
@@ -170,23 +195,23 @@ app.delete('/api/productos/:id', verificarAdmin, async (req, res) => {
             return res.status(404).json({ mensaje: 'Producto no encontrado.' });
         }
 
-        // Eliminar la imagen asociada
+        // Eliminar la imagen física guardada en la carpeta uploads
         const rutaImagen = path.join(__dirname, 'public/uploads', filas[0].imagen);
         if (fs.existsSync(rutaImagen)) {
             fs.unlinkSync(rutaImagen);
         }
 
-        // Eliminar registro de la base de datos
+        // Eliminar el registro en MySQL
         await db.query('DELETE FROM productos WHERE id = ?', [id]);
 
         res.json({ mensaje: 'Producto eliminado exitosamente.' });
     } catch (error) {
-        console.error(error);
+        console.error('Error al eliminar producto:', error);
         res.status(500).json({ mensaje: 'Error al eliminar el producto.' });
     }
 });
 
 // Iniciar Servidor
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`Servidor iniciado en http://localhost:${PORT}`);
 });

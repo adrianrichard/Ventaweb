@@ -15,8 +15,8 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (respuesta.ok) {
-            // Si el login es correcto, redirigir al panel de administración
-            window.location.href = 'admin.html';
+            // Redirigir directamente a la ruta /admin configurada en Express
+            window.location.href = '/admin';
         } else {
             errorMsg.textContent = resultado.mensaje || 'Credenciales incorrectas';
         }
