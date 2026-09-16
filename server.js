@@ -137,13 +137,22 @@ app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, 
         return res.status(400).json({ mensaje: 'La imagen del producto es obligatoria.' });
     }
 
-    const imagen = req.file.filename;
+    // Nombre único para el archivo de salida
+    const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
+    const outputPath = path.join(__dirname, 'public/uploads', filename);
 
     try {
+        // Redimensionar la imagen a 300px de alto manteniendo el ratio
+        await sharp(req.file.buffer)
+            .resize({ height: 300, fit: 'inside' })
+            .jpeg({ quality: 80 })
+            .toFile(outputPath);
+
         await db.query(
             'INSERT INTO productos (nombre, precio, imagen) VALUES (?, ?, ?)',
-            [nombre, parseFloat(precio), imagen]
+            [nombre, parseFloat(precio), filename]
         );
+
         res.status(201).json({ mensaje: 'Producto creado exitosamente.' });
     } catch (error) {
         console.error('Error al crear producto:', error);
@@ -164,9 +173,17 @@ app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (re
 
         let nuevaImagen = productoExistente[0].imagen;
 
-        // Si el admin sube una nueva imagen, reemplaza la anterior y borra la vieja del disco
+        // Si se sube una nueva imagen, se redimensiona y reemplaza la anterior
         if (req.file) {
-            nuevaImagen = req.file.filename;
+            nuevaImagen = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
+            const outputPath = path.join(__dirname, 'public/uploads', nuevaImagen);
+
+            await sharp(req.file.buffer)
+                .resize({ height: 300, fit: 'inside' })
+                .jpeg({ quality: 80 })
+                .toFile(outputPath);
+
+            // Eliminar la imagen antigua del disco
             const rutaAntigua = path.join(__dirname, 'public/uploads', productoExistente[0].imagen);
             if (fs.existsSync(rutaAntigua)) {
                 fs.unlinkSync(rutaAntigua);
