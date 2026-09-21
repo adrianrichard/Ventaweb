@@ -23,7 +23,7 @@ app.use(session({
 }));
 
 // 3. Configurar la subida de imágenes con Multer
-const storage = multer.diskStorage({
+const storage = multer.memoryStorage({
     destination: (req, file, cb) => {
         const dir = path.join(__dirname, 'public/uploads');
         if (!fs.existsSync(dir)) {
@@ -73,6 +73,9 @@ app.get('/admin', (req, res) => {
         res.redirect('/login');
     }
 });
+
+// Servir favicon directamente desde la carpeta public
+app.use('/favicon.ico', express.static(path.join(__dirname, 'public/favicon.ico')));
 
 // ==========================================
 // RUTAS DE AUTENTICACIÓN
@@ -131,31 +134,31 @@ app.get('/api/productos', async (req, res) => {
 
 // Agregar un nuevo producto (Protegido por Admin)
 app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, res) => {
-    const { nombre, precio } = req.body;
+    // 1. Extraer categoria
+    const { nombre, precio, categoria } = req.body;
     
     if (!req.file) {
         return res.status(400).json({ mensaje: 'La imagen del producto es obligatoria.' });
     }
 
-    // Nombre único para el archivo de salida
     const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
     const outputPath = path.join(__dirname, 'public/uploads', filename);
 
     try {
-        // Redimensionar la imagen a 300px de alto manteniendo el ratio
         await sharp(req.file.buffer)
             .resize({ height: 300, fit: 'inside' })
             .jpeg({ quality: 80 })
             .toFile(outputPath);
 
+        // 2. Verificar que la consulta SQL coincida con tus columnas en MariaDB
         await db.query(
-            'INSERT INTO productos (nombre, precio, imagen) VALUES (?, ?, ?)',
-            [nombre, parseFloat(precio), filename]
+            'INSERT INTO productos (nombre, precio, categoria, imagen) VALUES (?, ?, ?, ?)',
+            [nombre, parseFloat(precio), categoria || 'General', filename]
         );
 
         res.status(201).json({ mensaje: 'Producto creado exitosamente.' });
     } catch (error) {
-        console.error('Error al crear producto:', error);
+        console.error('Error detallado en el servidor:', error); // Esto mostrará el error exacto en tu terminal
         res.status(500).json({ mensaje: 'Error al guardar el producto.' });
     }
 });
@@ -163,7 +166,8 @@ app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, 
 // Editar un producto existente (Protegido por Admin)
 app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (req, res) => {
     const { id } = req.params;
-    const { nombre, precio } = req.body;
+    // 1. Extraer categoria
+    const { nombre, precio, categoria } = req.body;
 
     try {
         const [productoExistente] = await db.query('SELECT * FROM productos WHERE id = ?', [id]);
@@ -173,7 +177,6 @@ app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (re
 
         let nuevaImagen = productoExistente[0].imagen;
 
-        // Si se sube una nueva imagen, se redimensiona y reemplaza la anterior
         if (req.file) {
             nuevaImagen = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
             const outputPath = path.join(__dirname, 'public/uploads', nuevaImagen);
@@ -183,16 +186,16 @@ app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (re
                 .jpeg({ quality: 80 })
                 .toFile(outputPath);
 
-            // Eliminar la imagen antigua del disco
             const rutaAntigua = path.join(__dirname, 'public/uploads', productoExistente[0].imagen);
             if (fs.existsSync(rutaAntigua)) {
                 fs.unlinkSync(rutaAntigua);
             }
         }
 
+        // 2. Actualizar el UPDATE con categoria
         await db.query(
-            'UPDATE productos SET nombre = ?, precio = ?, imagen = ? WHERE id = ?',
-            [nombre, parseFloat(precio), nuevaImagen, id]
+            'UPDATE productos SET nombre = ?, precio = ?, categoria = ?, imagen = ? WHERE id = ?',
+            [nombre, parseFloat(precio), categoria || 'General', nuevaImagen, id]
         );
 
         res.json({ mensaje: 'Producto actualizado exitosamente.' });
@@ -228,7 +231,20 @@ app.delete('/api/productos/:id', verificarAdmin, async (req, res) => {
     }
 });
 
+// Obtener lista de categorías únicas de los productos
+app.get('/api/categorias', async (req, res) => {
+    try {
+        const [filas] = await db.query('SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria != "" ORDER BY categoria ASC');
+        const categorias = filas.map(f => f.categoria);
+        res.json(categorias);
+    } catch (error) {
+        console.error('Error al obtener categorías:', error);
+        res.status(500).json({ mensaje: 'Error al obtener categorías' });
+    }
+});
+
 // Iniciar Servidor
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en http://localhost:${PORT}`);
 });
+

@@ -54,7 +54,7 @@
 }
 
 .tabla-productos th, .tabla-productos td {
-    padding: 0.8rem;
+    padding: 0.5rem;
     border-bottom: 1px solid #ddd;
     text-align: left;
 }
@@ -75,9 +75,9 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 1rem;
+    padding: 0.5rem;
     text-align: center;
-    width: 260px; /* Ancho fijo para cada tarjeta de producto */
+    width: 200px; /* Ancho fijo para cada tarjeta de producto */
     box-sizing: border-box;
 }
 
@@ -86,4 +86,14 @@
     height: 300px;
     object-fit: contain; /* Mantiene la proporción sin deformar */
     border-radius: 4px;
+}
+.badge-categoria {
+    display: inline-block;
+    background-color: #e0e0e0;
+    color: #333;
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin: 4px 0;
+    text-transform: capitalize;
 }

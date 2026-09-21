@@ -22,27 +22,32 @@
         <section class="admin-section">
             <h2 id="form-titulo">Agregar Nuevo Producto</h2>
             <form id="form-producto" enctype="multipart/form-data">
-                <input type="hidden" id="producto-id"> <!-- Campo oculto para edición -->
+                <!-- Campo Oculto para almacenar el ID durante la edición -->
+                <input type="hidden" id="producto-id">
 
-                <div class="form-group">
-                    <label for="nombre">Nombre del producto:</label>
-                    <input type="text" id="nombre" name="nombre" required>
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre del producto" required>
+                <input type="number" step="0.01" id="precio" name="precio" placeholder="Precio" required>
+                
+                <!-- Campo Selector de Categoría -->
+                <div class="campo-categoria">
+                    <label for="select-categoria">Categoría:</label>
+                    <select id="select-categoria" name="categoria" required>
+                        <option value="" disabled selected>Selecciona una categoría</option>
+                        <option value="Calzados">Calzados</option>
+                        <option value="Indumentaria">Indumentaria</option>
+                        <option value="Electrónica">Electrónica</option>
+                        <option value="Hogar">Hogar</option>
+                        <option value="__NUEVA__">➕ Nueva categoría...</option>
+                    </select>
+
+                    <input type="text" id="nueva-categoria-input" placeholder="Escribe la nueva categoría" style="display: none; margin-top: 8px;">
                 </div>
-
-                <div class="form-group">
-                    <label for="precio">Precio ($):</label>
-                    <input type="number" step="0.01" id="precio" name="precio" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="imagen">Imagen:</label>
-                    <input type="file" id="imagen" name="imagen" accept="image/*">
-                    <small id="imagen-ayuda">Obligatorio al crear. Dejar vacío al editar si no deseas cambiarla.</small>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary" id="btn-guardar">Guardar Producto</button>
-                    <button type="button" class="btn-secondary" id="btn-cancelar" style="display: none;">Cancelar Edición</button>
+                
+                <input type="file" id="imagen" name="imagen" accept="image/*">
+                
+                <div class="form-acciones" style="margin-top: 10px;">
+                    <button type="submit" id="btn-guardar">Guardar Producto</button>
+                    <button type="button" id="btn-cancelar" style="display: none;">Cancelar</button>
                 </div>
             </form>
         </section>
@@ -56,6 +61,7 @@
                         <th>Imagen</th>
                         <th>Nombre</th>
                         <th>Precio</th>
+                        <th>Categoría</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -67,6 +73,6 @@
 
     </main>
 
-    <script src="/public/js/admin.js"></script>
+    <script src="/public/js/admin.js" defer></script>
 </body>
 </html>
