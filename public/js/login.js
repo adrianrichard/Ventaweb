@@ -6,7 +6,8 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     const errorMsg = document.getElementById('error-msg');
 
     try {
-        const respuesta = await fetch('/api/login', {
+        // En lugar de fetch('/api/login')
+        const res = await fetch('https://mi-tienda-backend.onrender.com/api/login', { ... });
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
