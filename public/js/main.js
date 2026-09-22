@@ -24,7 +24,6 @@ async function cargarProductos() {
             card.innerHTML = `
                 <img src="/uploads/${prod.imagen}" alt="${prod.nombre}">
                 <h3>${prod.nombre}</h3>
-                <span class="badge-categoria">${prod.categoria}</span>
                 <p class="precio">$${parseFloat(prod.precio).toFixed(2)}</p>
             `;
                         grid.appendChild(card);

@@ -97,3 +97,12 @@
     margin: 4px 0;
     text-transform: capitalize;
 }
+
+body {
+    /* Elige el color que prefieras: */
+    background-color: #eef2f5; /* Gris claro moderno (Recomendado) */
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    color: #333333;
+}
