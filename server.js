@@ -10,41 +10,40 @@ const sharp = require('sharp');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Render (y otros hostings) funcionan detrás de un proxy: necesario para las cookies de sesión
+app.set('trust proxy', 1);
+
+// Asegurar que exista la carpeta de imágenes (en Render no viene en el repo si está vacía)
+const uploadsDir = path.join(__dirname, 'public/uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
+
 // 1. Middlewares para parsear el cuerpo de las peticiones
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 2. Configuración de sesiones
 app.use(session({
-    secret: 'clave_secreta_mi_tienda_123', // Cambia esta frase por una más segura
+    // Definí SESSION_SECRET en las variables de entorno de Render
+    secret: process.env.SESSION_SECRET || 'clave_solo_para_desarrollo_local',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 2 } // Expira en 2 horas
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 2, // Expira en 2 horas
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: 'auto' // usa cookie segura automáticamente cuando la conexión es HTTPS
+    }
 }));
 
-// 3. Configurar la subida de imágenes con Multer
-const storage = multer.memoryStorage({
-    destination: (req, file, cb) => {
-        const dir = path.join(__dirname, 'public/uploads');
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        // Genera un nombre único usando timestamp para evitar sobreescritura
-        const ext = path.extname(file.originalname);
-        const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-        cb(null, filename);
-    }
+// 3. Configurar la subida de imágenes con Multer (en memoria, luego se procesa con sharp)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // máximo 5 MB
 });
-const upload = multer({ storage });
 
-// 4. Archivos estáticos
-// Permite acceder a los archivos estáticos de la carpeta raíz (HTML) y de public (CSS, JS, imágenes)
-app.use(express.static(__dirname));
+// 4. Archivos estáticos: solo la carpeta public (ya NO se expone la raíz del proyecto)
 app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 // Middleware para proteger rutas que requieren permisos de Administrador
 function verificarAdmin(req, res, next) {
@@ -58,11 +57,11 @@ function verificarAdmin(req, res, next) {
 // RUTAS PARA SERVIR PÁGINAS HTML (DESDE LA RAÍZ)
 // ==========================================
 
-app.get('/', (req, res) => {
+app.get(['/', '/index.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/login', (req, res) => {
+app.get(['/login', '/login.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
 });
 
@@ -72,6 +71,11 @@ app.get('/admin', (req, res) => {
     } else {
         res.redirect('/login');
     }
+});
+
+// Evita entrar al panel saltándose la verificación
+app.get('/admin.html', (req, res) => {
+    res.redirect('/admin');
 });
 
 // Servir favicon directamente desde la carpeta public
@@ -87,7 +91,7 @@ app.post('/api/login', async (req, res) => {
 
     try {
         const [filas] = await db.query('SELECT * FROM usuarios WHERE username = ?', [username]);
-        
+
         if (filas.length === 0) {
             return res.status(401).json({ mensaje: 'Usuario o contraseña incorrectos.' });
         }
@@ -134,15 +138,14 @@ app.get('/api/productos', async (req, res) => {
 
 // Agregar un nuevo producto (Protegido por Admin)
 app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, res) => {
-    // 1. Extraer categoria
     const { nombre, precio, categoria } = req.body;
-    
+
     if (!req.file) {
         return res.status(400).json({ mensaje: 'La imagen del producto es obligatoria.' });
     }
 
     const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
-    const outputPath = path.join(__dirname, 'public/uploads', filename);
+    const outputPath = path.join(uploadsDir, filename);
 
     try {
         await sharp(req.file.buffer)
@@ -150,7 +153,6 @@ app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, 
             .jpeg({ quality: 80 })
             .toFile(outputPath);
 
-        // 2. Verificar que la consulta SQL coincida con tus columnas en MariaDB
         await db.query(
             'INSERT INTO productos (nombre, precio, categoria, imagen) VALUES (?, ?, ?, ?)',
             [nombre, parseFloat(precio), categoria || 'General', filename]
@@ -158,7 +160,7 @@ app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, 
 
         res.status(201).json({ mensaje: 'Producto creado exitosamente.' });
     } catch (error) {
-        console.error('Error detallado en el servidor:', error); // Esto mostrará el error exacto en tu terminal
+        console.error('Error detallado en el servidor:', error);
         res.status(500).json({ mensaje: 'Error al guardar el producto.' });
     }
 });
@@ -166,7 +168,6 @@ app.post('/api/productos', verificarAdmin, upload.single('imagen'), async (req, 
 // Editar un producto existente (Protegido por Admin)
 app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (req, res) => {
     const { id } = req.params;
-    // 1. Extraer categoria
     const { nombre, precio, categoria } = req.body;
 
     try {
@@ -179,20 +180,19 @@ app.put('/api/productos/:id', verificarAdmin, upload.single('imagen'), async (re
 
         if (req.file) {
             nuevaImagen = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`;
-            const outputPath = path.join(__dirname, 'public/uploads', nuevaImagen);
+            const outputPath = path.join(uploadsDir, nuevaImagen);
 
             await sharp(req.file.buffer)
                 .resize({ height: 300, fit: 'inside' })
                 .jpeg({ quality: 80 })
                 .toFile(outputPath);
 
-            const rutaAntigua = path.join(__dirname, 'public/uploads', productoExistente[0].imagen);
+            const rutaAntigua = path.join(uploadsDir, productoExistente[0].imagen);
             if (fs.existsSync(rutaAntigua)) {
                 fs.unlinkSync(rutaAntigua);
             }
         }
 
-        // 2. Actualizar el UPDATE con categoria
         await db.query(
             'UPDATE productos SET nombre = ?, precio = ?, categoria = ?, imagen = ? WHERE id = ?',
             [nombre, parseFloat(precio), categoria || 'General', nuevaImagen, id]
@@ -216,12 +216,11 @@ app.delete('/api/productos/:id', verificarAdmin, async (req, res) => {
         }
 
         // Eliminar la imagen física guardada en la carpeta uploads
-        const rutaImagen = path.join(__dirname, 'public/uploads', filas[0].imagen);
+        const rutaImagen = path.join(uploadsDir, filas[0].imagen);
         if (fs.existsSync(rutaImagen)) {
             fs.unlinkSync(rutaImagen);
         }
 
-        // Eliminar el registro en MySQL
         await db.query('DELETE FROM productos WHERE id = ?', [id]);
 
         res.json({ mensaje: 'Producto eliminado exitosamente.' });
@@ -234,7 +233,7 @@ app.delete('/api/productos/:id', verificarAdmin, async (req, res) => {
 // Obtener lista de categorías únicas de los productos
 app.get('/api/categorias', async (req, res) => {
     try {
-        const [filas] = await db.query('SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria != "" ORDER BY categoria ASC');
+        const [filas] = await db.query("SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria != '' ORDER BY categoria ASC");
         const categorias = filas.map(f => f.categoria);
         res.json(categorias);
     } catch (error) {
@@ -246,17 +245,4 @@ app.get('/api/categorias', async (req, res) => {
 // Iniciar Servidor
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en http://localhost:${PORT}`);
-});
-
-const mysql = require('mysql2/promise');
-
-const db = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'tu_base_de_datos',
-    port: process.env.DB_PORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
 });
