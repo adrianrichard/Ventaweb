@@ -3,34 +3,50 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function cargarProductos() {
-    const grid = document.getElementById("productos-grid");
+    const gridProductos = document.getElementById('productos-grid');
+    if (!gridProductos) return;
 
     try {
-        // Petición a la API del servidor backend
-        const respuesta = await fetch("/api/productos");
-        const productos = await respuesta.json();
+        const res = await fetch('/api/productos');
 
-        grid.innerHTML = ""; // Limpiar mensaje de carga
+        // Validar si el servidor respondió con un error (ej. 500)
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.mensaje || `Error del servidor (${res.status})`);
+        }
+
+        const productos = await res.json();
+
+        // Verificar que la respuesta sea un arreglo antes de iterar
+        if (!Array.isArray(productos)) {
+            throw new TypeError("El servidor no devolvió una lista de productos válida.");
+        }
+
+        gridProductos.innerHTML = '';
 
         if (productos.length === 0) {
-            grid.innerHTML = "<p>No hay productos disponibles por el momento.</p>";
+            gridProductos.innerHTML = '<p>No hay productos disponibles por el momento.</p>';
             return;
         }
 
-        // Generar las tarjetas HTML por cada producto
         productos.forEach(prod => {
-            const card = document.createElement("div");
-            card.className = "card-producto";
+            const card = document.createElement('div');
+            card.className = 'card-producto';
+            
             card.innerHTML = `
                 <img src="/uploads/${prod.imagen}" alt="${prod.nombre}">
                 <h3>${prod.nombre}</h3>
+                <span class="badge-categoria">${prod.categoria || 'General'}</span>
                 <p class="precio">$${parseFloat(prod.precio).toFixed(2)}</p>
             `;
-                        grid.appendChild(card);
+            
+            gridProductos.appendChild(card);
         });
 
-    } catch (error) {
-        console.error("Error al obtener los productos:", error);
-        grid.innerHTML = "<p>Error al cargar el catálogo de productos.</p>";
+    } catch (err) {
+        console.error('Error al obtener los productos:', err);
+        gridProductos.innerHTML = `<p class="error-msg">Error al cargar productos: ${err.message}</p>`;
     }
 }
+
+document.addEventListener('DOMContentLoaded', cargarProductos);
