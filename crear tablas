@@ -1,8 +1,9 @@
 export DB_HOST="mysql-77acff3-tiendaweb02.e.aivencloud.com";
 export DB_PORT="11337";
 export DB_USER="avnadmin"; 
-export DB_PASSWORD="AVNS_i0DU7XOwU8uYyQDRSUh"; 
+export DB_PASSWORD="**"; 
 export DB_NAME="defaultdb";
 export DB_SSL="true"
 export DB_SSL_CA="$(cat ca.pem)"
 node crear-tablas.js
+AVNS_i0DU7XOwU8uYyQDRSUh
