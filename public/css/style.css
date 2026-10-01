@@ -87,7 +87,7 @@
     object-fit: contain; /* Mantiene la proporción sin deformar */
     border-radius: 4px;
 }
-.badge-categoria {
+.precio {
     display: inline-block;
     background-color: #e0e0e0;
     color: #333;
