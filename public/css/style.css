@@ -138,3 +138,52 @@ body {
     color: #666;
     padding: 1rem 0;
 }
+
+/* Botón de WhatsApp */
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #25D366;
+    color: #ffffff;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: 50px;
+    box-shadow: 0 3px 8px rgba(37, 211, 102, 0.4);
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-whatsapp:hover {
+    background-color: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(18, 140, 126, 0.5);
+}
+
+.btn-whatsapp:active {
+    transform: translateY(0);
+}
+
+.btn-whatsapp-flotante {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background-color: #25D366;
+    color: #ffffff;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-whatsapp-flotante:hover {
+    background-color: #128C7E;
+    transform: scale(1.08);
+}
