@@ -33,7 +33,7 @@
 
 /* Botones */
 .btn-primary { background: #3498db; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; }
-.btn-secondary { background: #7f8c8d; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; text-decoration: none; cursor: pointer; display: flex; justify-content: flex-end;}
+.btn-secondary { background: #7f8c8d; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; text-decoration: none; cursor: pointer; float: right;}
 .btn-danger { background: #e74c3c; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; }
 .btn-edit { background: #f39c12; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
 .btn-delete { background: #e74c3c; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
@@ -127,7 +127,7 @@ body {
     box-sizing: border-box;
 }
 
-.filtros input[type="search"] { flex: 1 1 240px; }
+.filtros input[type="search"] { flex: 1 1 40px; }
 .filtros select { flex: 0 1 220px; }
 
 .buscador-admin {
