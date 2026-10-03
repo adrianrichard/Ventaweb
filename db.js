@@ -1,3 +1,4 @@
+const fs = require('fs');
 const mysql = require('mysql2/promise');
 
 // Configuración del pool a partir de variables de entorno
@@ -20,8 +21,12 @@ if (process.env.DB_SSL === 'true') {
         rejectUnauthorized: true
     };
 
-    // Aiven entrega un certificado CA: pegá su contenido en DB_SSL_CA
-    if (process.env.DB_SSL_CA) {
+    // Aiven entrega un certificado CA. Dos formas de indicarlo:
+    // - DB_SSL_CA_FILE: ruta a un archivo (cómodo en tu PC, ej. ./ca.pem)
+    // - DB_SSL_CA: el contenido completo del certificado (cómodo en Render)
+    if (process.env.DB_SSL_CA_FILE) {
+        config.ssl.ca = fs.readFileSync(process.env.DB_SSL_CA_FILE);
+    } else if (process.env.DB_SSL_CA) {
         config.ssl.ca = process.env.DB_SSL_CA;
     }
 }
