@@ -72,7 +72,6 @@ function renderizarProductos() {
         card.innerHTML = `
             <img src="/api/productos/${prod.id}/imagen?v=${version}" alt="${escaparHtml(prod.nombre)}">
             <h3>${escaparHtml(prod.nombre)}</h3>
-            <span class="badge-categoria">${escaparHtml(prod.categoria || 'General')}</span>
             <p class="precio">$${parseFloat(prod.precio).toFixed(2)}</p>
         `;
 
