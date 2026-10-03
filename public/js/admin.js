@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelar = document.getElementById('btn-cancelar');
     const btnLogout = document.getElementById('btn-logout');
     const tablaBody = document.getElementById('tabla-body');
+    const buscadorAdmin = document.getElementById('buscador-admin');
+
+    if (buscadorAdmin) buscadorAdmin.addEventListener('input', renderizarTablaAdmin);
 
     // Mostrar/ocultar input de nueva categoría
     if (selectCategoria && nuevaCategoriaInput) {
@@ -84,7 +87,14 @@ async function cargarCategoriasEnSelect() {
     }
 }
 
-// Cargar productos en la tabla
+let productosAdmin = [];
+
+// Minúsculas y sin acentos, para que "camara" encuentre "Cámara"
+function normalizar(texto) {
+    return (texto ?? '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// Cargar productos desde el servidor
 async function cargarProductosAdmin() {
     const tbody = document.getElementById('tabla-body');
     if (!tbody) return;
@@ -93,59 +103,84 @@ async function cargarProductosAdmin() {
         const res = await fetch('/api/productos');
         if (!res.ok) throw new Error(`Error del servidor (${res.status})`);
 
-        const productos = await res.json();
-        tbody.innerHTML = '';
-
-        productos.forEach(p => {
-            const version = new Date(p.actualizado_en).getTime() || 0;
-            const categoria = p.categoria || 'General';
-            const tr = document.createElement('tr');
-
-            // Imagen
-            const tdImg = document.createElement('td');
-            const img = document.createElement('img');
-            img.src = `/api/productos/${p.id}/imagen?v=${version}`;
-            img.width = 60;
-            img.height = 60;
-            img.style.cssText = 'object-fit:cover; border-radius:4px;';
-            img.addEventListener('error', () => { img.src = SIN_IMAGEN; }, { once: true });
-            tdImg.appendChild(img);
-
-            // Textos (textContent evita inyección de HTML)
-            const tdNombre = document.createElement('td');
-            tdNombre.textContent = p.nombre;
-
-            const tdPrecio = document.createElement('td');
-            tdPrecio.textContent = `$${parseFloat(p.precio).toFixed(2)}`;
-
-            const tdCategoria = document.createElement('td');
-            tdCategoria.textContent = categoria;
-
-            // Acciones
-            const tdAcciones = document.createElement('td');
-
-            const btnEditar = document.createElement('button');
-            btnEditar.className = 'btn-edit';
-            btnEditar.textContent = 'Editar';
-            btnEditar.dataset.accion = 'editar';
-            btnEditar.dataset.id = p.id;
-            btnEditar.dataset.nombre = p.nombre;
-            btnEditar.dataset.precio = p.precio;
-            btnEditar.dataset.categoria = categoria;
-
-            const btnEliminar = document.createElement('button');
-            btnEliminar.className = 'btn-delete';
-            btnEliminar.textContent = 'Eliminar';
-            btnEliminar.dataset.accion = 'eliminar';
-            btnEliminar.dataset.id = p.id;
-
-            tdAcciones.append(btnEditar, ' ', btnEliminar);
-            tr.append(tdImg, tdNombre, tdPrecio, tdCategoria, tdAcciones);
-            tbody.appendChild(tr);
-        });
+        productosAdmin = await res.json();
+        renderizarTablaAdmin();
     } catch (err) {
         console.error('Error al cargar tabla admin:', err);
     }
+}
+
+// Dibujar la tabla aplicando el texto del buscador
+function renderizarTablaAdmin() {
+    const tbody = document.getElementById('tabla-body');
+    if (!tbody) return;
+
+    const buscador = document.getElementById('buscador-admin');
+    const texto = normalizar(buscador ? buscador.value.trim() : '');
+    const lista = productosAdmin.filter(p => normalizar(p.nombre).includes(texto));
+
+    tbody.innerHTML = '';
+
+    if (lista.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.className = 'sin-resultados';
+        td.textContent = productosAdmin.length === 0
+            ? 'Todavía no hay productos cargados.'
+            : 'No se encontraron productos con ese nombre.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    lista.forEach(p => {
+        const version = new Date(p.actualizado_en).getTime() || 0;
+        const categoria = p.categoria || 'General';
+        const tr = document.createElement('tr');
+
+        // Imagen
+        const tdImg = document.createElement('td');
+        const img = document.createElement('img');
+        img.src = `/api/productos/${p.id}/imagen?v=${version}`;
+        img.width = 60;
+        img.height = 60;
+        img.style.cssText = 'object-fit:cover; border-radius:4px;';
+        img.addEventListener('error', () => { img.src = SIN_IMAGEN; }, { once: true });
+        tdImg.appendChild(img);
+
+        // Textos (textContent evita inyección de HTML)
+        const tdNombre = document.createElement('td');
+        tdNombre.textContent = p.nombre;
+
+        const tdPrecio = document.createElement('td');
+        tdPrecio.textContent = `$${parseFloat(p.precio).toFixed(2)}`;
+
+        const tdCategoria = document.createElement('td');
+        tdCategoria.textContent = categoria;
+
+        // Acciones
+        const tdAcciones = document.createElement('td');
+
+        const btnEditar = document.createElement('button');
+        btnEditar.className = 'btn-edit';
+        btnEditar.textContent = 'Editar';
+        btnEditar.dataset.accion = 'editar';
+        btnEditar.dataset.id = p.id;
+        btnEditar.dataset.nombre = p.nombre;
+        btnEditar.dataset.precio = p.precio;
+        btnEditar.dataset.categoria = categoria;
+
+        const btnEliminar = document.createElement('button');
+        btnEliminar.className = 'btn-delete';
+        btnEliminar.textContent = 'Eliminar';
+        btnEliminar.dataset.accion = 'eliminar';
+        btnEliminar.dataset.id = p.id;
+
+        tdAcciones.append(btnEditar, ' ', btnEliminar);
+        tr.append(tdImg, tdNombre, tdPrecio, tdCategoria, tdAcciones);
+        tbody.appendChild(tr);
+    });
 }
 
 // Crear o Editar Producto
