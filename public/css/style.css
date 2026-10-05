@@ -32,18 +32,19 @@
 }
 
 /* Botones */
-.btn-primary { background: #3498db; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; }
-.btn-secondary { background: #7f8c8d; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; text-decoration: none; cursor: pointer; float: right;}
-.btn-danger { background: #e74c3c; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; }
-.btn-edit { background: #f39c12; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
-.btn-delete { background: #e74c3c; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
+.btn-primary { background: #3498db; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.btn-secondary { background: #7f8c8d; font-weight: bold; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; cursor: pointer; float: right; margin-right: 20px;}
+.btn-danger { background: #e74c3c; height: 37px; font-weight: bold; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.btn-guardar { background: #109c10; height: 37px; font-weight: bold; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.btn-edit { background: #f39c12; font-weight: bold; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
+.btn-delete { background: #e74c3c; font-weight: bold; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
 
 /* Panel Admin */
 .admin-section {
     background: white;
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 8px;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
@@ -107,13 +108,13 @@ body {
     color: #333333;
 }
 
-
 /* Buscador y filtros */
 .filtros {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     margin-bottom: 1.5rem;
+    justify-content: flex-end;
 }
 
 .filtros input[type="search"],
@@ -128,12 +129,14 @@ body {
     margin-right: 20px;
 }
 
-.filtros input[type="search"] { flex: 1 1 40px; }
+.filtros input[type="search"] { flex: 0 1 300px; }
 .filtros select { flex: 0 1 220px; }
 
 .buscador-admin {
-    width: 100%;
-    margin-top: 0.5rem;
+    display: block;
+    width: 300px;
+    max-width: 100%;
+    margin: 0.5rem 0 0 auto;
 }
 
 .sin-resultados {
@@ -188,4 +191,10 @@ body {
 .btn-whatsapp-flotante:hover {
     background-color: #128C7E;
     transform: scale(1.08);
+}
+
+.header{
+    text-align: center;
+    margin-bottom: 0.1rem;
+    background-color: white;
 }

@@ -22,17 +22,17 @@
             <a href="login.html" class="btn-secondary" target="_blank">Acceso Admin</a>
         </div>
     </header>
-
+    <!-- Buscador y filtro por categoría -->
+    <div class="filtros">
+        <input type="search" id="buscador" placeholder="🔍 Buscar producto por nombre..." autocomplete="off">
+        <select id="filtro-categoria" >
+            <option value="">Todas las categorías</option>
+        </select>
+    </div>
     <main class="container">
         <h2>Nuestros Productos</h2>
 
-        <!-- Buscador y filtro por categoría -->
-        <div class="filtros">
-            <input type="search" id="buscador" placeholder="🔍 Buscar producto por nombre..." autocomplete="off">
-            <select id="filtro-categoria" >
-                <option value="">Todas las categorías</option>
-            </select>
-        </div>
+
 
         <div id="productos-grid" class="grid-productos">
             <p>Cargando productos...</p>

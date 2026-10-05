@@ -9,12 +9,13 @@
 <body>
 
     <header class="header">
-        <h1>Panel de Administración</h1>
-        <div>
-            <a href="index.html" class="btn-secondary" target="_blank">Ver tienda</a>
-            <button id="btn-logout" class="btn-danger">Cerrar Sesión</button>
+        <div class="logo-container">
+            <img src="/public/images/logo.png" alt="Logo de la tienda" class="logo">
         </div>
+        <h1>Panel de Administración</h1>
     </header>
+    <a href="index.html" class="btn-secondary" target="_blank">Ver tienda</a>
+    <button id="btn-logout" class="btn-danger">Cerrar Sesión</button>
 
     <main class="container">
 
@@ -43,11 +44,11 @@
                     <input type="text" id="nueva-categoria-input" placeholder="Escribe la nueva categoría" style="display: none; margin-top: 8px;">
                 </div>
                 <br>
-                <label for="imagen">Imagen:</label>
+                <label for="imagen">Agregar imagen:</label>
                 <input type="file" id="imagen" name="imagen" accept="image/*">
                 <br>
                 <div class="form-acciones" style="margin-top: 10px;">
-                    <button type="submit" id="btn-guardar">Guardar Producto</button>
+                    <button type="submit" id="btn-guardar" class="btn-guardar">Guardar Producto</button>
                     <button type="button" id="btn-cancelar" style="display: none;">Cancelar</button>
                 </div>
             </form>
