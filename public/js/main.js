@@ -36,6 +36,27 @@ function llenarFiltroCategorias() {
     if (categorias.includes(seleccionada)) select.value = seleccionada;
 }
 
+// Muestra la imagen ampliada sobre toda la pantalla
+function abrirImagen(src, alt) {
+    const overlay = document.createElement('div');
+    overlay.className = 'lightbox';
+    overlay.innerHTML = '<button class="lightbox-cerrar" aria-label="Cerrar">&times;</button><img>';
+
+    const img = overlay.querySelector('img');
+    img.src = src;
+    img.alt = alt;
+
+    const cerrar = () => {
+        overlay.remove();
+        document.removeEventListener('keydown', alPresionarTecla);
+    };
+    const alPresionarTecla = (e) => { if (e.key === 'Escape') cerrar(); };
+
+    overlay.addEventListener('click', cerrar);
+    document.addEventListener('keydown', alPresionarTecla);
+    document.body.appendChild(overlay);
+}
+
 function renderizarProductos() {
     const gridProductos = document.getElementById('productos-grid');
     if (!gridProductos) return;
@@ -75,9 +96,9 @@ function renderizarProductos() {
             <p class="precio">$${parseFloat(prod.precio).toFixed(2)}</p>
         `;
 
-        card.querySelector('img').addEventListener('error', (e) => {
-            e.target.src = SIN_IMAGEN;
-        }, { once: true });
+        const imgCard = card.querySelector('img');
+        imgCard.addEventListener('error', () => { imgCard.src = SIN_IMAGEN; }, { once: true });
+        imgCard.addEventListener('click', () => abrirImagen(imgCard.src, prod.nombre));
 
         gridProductos.appendChild(card);
     });

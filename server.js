@@ -44,7 +44,7 @@ const upload = multer({
 function procesarImagen(buffer) {
     return sharp(buffer)
         .rotate() // respeta la orientación de fotos tomadas con el celular
-        .resize({ height: 300, fit: 'inside' })
+        .resize({ height: 900, fit: 'inside' })
         .jpeg({ quality: 80 })
         .toBuffer();
 }
