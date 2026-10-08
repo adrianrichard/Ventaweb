@@ -78,7 +78,7 @@
     justify-content: space-between;
     padding: 0.5rem;
     text-align: center;
-    width: 200px; /* Ancho fijo para cada tarjeta de producto */
+    width: 180px; /* Ancho fijo para cada tarjeta de producto */
     box-sizing: border-box;
 }
 
