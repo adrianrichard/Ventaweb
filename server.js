@@ -245,6 +245,8 @@ app.get('/api/categorias', async (req, res) => {
     }
 });
 
+app.use(require('./rutas-carrusel'));
+
 // Manejo de errores (por ejemplo, imagen demasiado grande): responde siempre en JSON
 app.use((err, req, res, next) => {
     console.error('Error:', err.message);

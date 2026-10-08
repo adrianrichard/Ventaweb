@@ -222,6 +222,7 @@ async function guardarProducto(e) {
 
         if (res.ok) {
             limpiarFormulario();
+            mostrarAviso(id ? 'Producto actualizado correctamente.' : 'Producto guardado correctamente.');
             await cargarCategoriasEnSelect();
             cargarProductosAdmin();
         } else {
@@ -305,4 +306,18 @@ async function eliminarProducto(id) {
 async function cerrarSesion() {
     await fetch('/api/logout', { method: 'POST' });
     window.location.href = '/login';
+}
+
+// Aviso flotante que desaparece solo
+function mostrarAviso(mensaje, tipo = 'exito') {
+    document.querySelectorAll('.aviso').forEach(a => a.remove());
+
+    const aviso = document.createElement('div');
+    aviso.className = `aviso aviso-${tipo}`;
+    aviso.setAttribute('role', 'status');
+    aviso.textContent = mensaje;
+    document.body.appendChild(aviso);
+
+    setTimeout(() => aviso.classList.add('aviso-saliendo'), 3000);
+    setTimeout(() => aviso.remove(), 3400);
 }

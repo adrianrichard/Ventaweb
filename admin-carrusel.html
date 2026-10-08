@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrusel de imágenes - Administración</title>
+    <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+
+    <header class="header">
+        <h1>Carrusel de imágenes</h1>
+        <div>
+            <a href="/admin" class="btn-secondary">← Volver al panel</a>
+            <button id="btn-logout" class="btn-danger">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="admin-section">
+            <h2>Agregar imagen</h2>
+            <p>El carrusel admite hasta <strong>10</strong> imágenes. Actualmente tiene: <strong id="contador">0 de 10</strong></p>
+
+            <form id="form-carrusel">
+                <input type="file" id="imagen-carrusel" accept="image/*" required>
+                <button type="submit" id="btn-subir" class="btn-primary">Subir imagen</button>
+            </form>
+            <p id="mensaje" class="mensaje" role="status"></p>
+        </section>
+
+        <section class="admin-section">
+            <h2>Imágenes actuales</h2>
+            <div id="lista-carrusel" class="carrusel-admin-grid">
+                <p>Cargando...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="/public/js/admin-carrusel.js" defer></script>
+</body>
+</html>
